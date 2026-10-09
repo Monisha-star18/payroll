@@ -154,3 +154,45 @@ async def fetch_employee_by_id(employee_id):
 
     except Exception as er:
         raise EmployeeRepositoryError(f"Iusse in repositry : {er}")
+
+
+
+# API field -> DB column. Only these names can ever reach the SQL string.
+PATCH_COLUMNS = {
+    "EmployeeName"        : "employee_name",
+    "EmployeeBasicSalary" : "employee_basic_salary",
+    "PF"                  : "pf",
+    "DA"                  : "da",
+    "GrossSalary"         : "gross_salary",
+}
+
+async def patch_employee(changes, employee_id):
+    try:
+        connection = await get_connection()
+
+        async with connection:
+            async with connection.cursor() as cursor:
+
+                set_clause = ", ".join(f"{PATCH_COLUMNS[key]} = %s" for key in changes)
+
+                query = f""" UPDATE employees
+                            SET {set_clause}
+                            WHERE employee_id = %s
+                            RETURNING employee_id, employee_name, employee_basic_salary, pf, da, gross_salary
+                        """
+
+                values = (*changes.values(), employee_id)
+
+                await cursor.execute(query, values)
+
+                columns = [column.name for column in cursor.description]
+
+                updated_employee_detail = await cursor.fetchone()  # one row, or None
+
+                if updated_employee_detail is not None:
+                    await connection.commit()
+
+                return columns, updated_employee_detail
+
+    except Exception as er:
+        raise EmployeeRepositoryError(f"Iusse in repositry : {er}")

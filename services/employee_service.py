@@ -3,7 +3,8 @@ from repositories.employee_repository import (
     post_new_employee , 
     delete_employee  , 
     put_employee,
-    fetch_employee_by_id)
+    fetch_employee_by_id,
+    patch_employee)
 
 from .payroll_service import PayrollService
 
@@ -88,3 +89,31 @@ async def get_employee_byid(employee_id):
         )
 
     return dict(zip(columns, employee_data))
+
+#partially update the employee
+async def partial_update_employee(employee_data,employee_id):
+
+
+    changes = employee_data.model_dump(exclude_unset=True)
+
+    if "EmployeeBasicSalary" in changes:
+
+        basic_salary = changes["EmployeeBasicSalary"]
+
+        changes["DA"] = PayrollService.calculate_da(basic_salary)
+        changes["PF"] = PayrollService.calculate_pf(basic_salary)
+        changes["GrossSalary"] = PayrollService.calculate_gross_salary(basic_salary)
+
+    columns, updated_employee = await patch_employee(changes,employee_id)
+
+    if updated_employee is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Employee with ID {employee_id} not found"
+        )
+
+    return {
+        "message" : "Updated Successfully",
+        "EmployeeID" : employee_id,
+        "Employee" : dict(zip(columns, updated_employee))
+    }

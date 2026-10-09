@@ -1,13 +1,14 @@
 from fastapi import APIRouter,Path
 
-from schemas.employee_schema import (CreateEmployee , UpdateEmployee)
+from schemas.employee_schema import (CreateEmployee , UpdateEmployee,PatchEmployee)
 
 from services.employee_service import (
                         get_all_employees , 
                         create_employee ,
                         remove_employee_byid,
                         update_employee,
-                        get_employee_byid) 
+                        get_employee_byid,
+                        partial_update_employee) 
 
 
 router = APIRouter( prefix="/api/employees")
@@ -49,3 +50,12 @@ async def remove_employee(employee_id : int =Path(gt=0) ):
 async def get_employee(employee_id: int = Path(gt=0)):
 
     return await get_employee_byid(employee_id)
+
+#update only the given fields of an employee
+@router.patch('/{employee_id}')
+async def patch_employee_detailes(
+    employee_data : PatchEmployee,
+    employee_id : int =Path(gt=0)
+    ):
+
+    return await partial_update_employee(employee_data,employee_id)
