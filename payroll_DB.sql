@@ -7,5 +7,7 @@ CREATE TABLE employees (
     employee_basic_salary  NUMERIC(12,2)  NOT NULL CHECK (employee_basic_salary >= 5000),
     pf                     NUMERIC(12,2)  NOT NULL,
     da                     NUMERIC(12,2)  NOT NULL,
-    gross_salary           NUMERIC(12,2)  NOT NULL
+    gross_salary           NUMERIC(12,2)  NOT NULL,
+    resume_path            VARCHAR(255)
 );
+
