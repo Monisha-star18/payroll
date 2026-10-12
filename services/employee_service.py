@@ -12,18 +12,16 @@ from fastapi import HTTPException
 
 
 #get employee deatiles
-async def get_all_employees() :
+async def get_all_employees(page:int , page_size:int) :
 
-    columns ,employees_data  = await fetch_all_employees()
+    offset = (page -1 ) * page_size
 
-    employees = []
+    employees_data  = await fetch_all_employees(page_size , offset)
 
-    for employee in employees_data :
-
-        employee_data = dict(zip(columns,employee))
-        employees.append(employee_data)
-
-    return employees
+    return { "data" : employees_data ,
+             "page": page,
+             "page_size": page_size,
+            }
 
 #create new employee and post 
 async def create_employee(employee_data):

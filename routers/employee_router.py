@@ -1,4 +1,4 @@
-from fastapi import APIRouter,Path
+from fastapi import APIRouter,Path,Query
 
 from schemas.employee_schema import (CreateEmployee , UpdateEmployee,PatchEmployee)
 
@@ -16,9 +16,10 @@ router = APIRouter( prefix="/api/employees")
 
 #get employees and salary deatils
 @router.get("/")
-async def get_employees():
+async def get_employees( page:int = Query(1,ge=1),
+                         page_size:int = Query(10,ge=1,le=100) ):
     
-    return await get_all_employees()
+    return await get_all_employees(page,page_size)
 
 
 

@@ -32,21 +32,19 @@ class UpdateEmployee(BaseModel):
             raise ValueError("Fill the employee name")
         return name
 
-    
 #partial update - send only the fields you want to change
 class PatchEmployee(BaseModel):
 
     model_config = ConfigDict(extra='forbid')
 
-    EmployeeName : str | None = Field(**NAME)
-    EmployeeBasicSalary : float | None = Field(**BASIC_SALARY)
+    EmployeeName : str | None = Field(default=None, min_length=3, max_length=100, pattern=r"^[A-Za-z ]+$")
+    EmployeeBasicSalary : float | None = Field(default=None, **BASIC_SALARY)
 
     @field_validator("EmployeeName")
     @classmethod
     def name_validator(cls,name):
-        if not name:
+        if name is not None and not name.strip():
             raise ValueError("Fill the employee name")
-        
         return name
 
     @model_validator(mode="after")

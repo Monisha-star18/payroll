@@ -4,7 +4,7 @@ from psycopg.errors import UniqueViolation
 from fastapi import HTTPException
 
 #get all employee
-async def fetch_all_employees():
+async def fetch_all_employees(limit: int, offset: int):
 
     try:
         connection = await get_connection()
@@ -12,15 +12,13 @@ async def fetch_all_employees():
         async with connection:
             async with connection.cursor() as cursor :  #creating the cursor to write the sql 
 
-                query = """ SELECT * FROM employees """
+                query = """SELECT * FROM employees ORDER BY employee_id LIMIT %s OFFSET %s"""
 
-                await cursor.execute (query) #Send SQL command to database
-
-                columns = [column.name for column in cursor.description] # get all the column names using description 
+                await cursor.execute (query,(limit,offset)) #Send SQL command to database
 
                 employees_data = await cursor.fetchall() #Gets all rows returned by the query
 
-                return columns , employees_data 
+                return employees_data 
             
     except Exception as er :
         raise EmployeeRepositoryError( f"Iusse in repositry : {er}")
